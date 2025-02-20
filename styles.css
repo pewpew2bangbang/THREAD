@@ -1,0 +1,126 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    
+}
+
+header {
+    background-color: #0073e6 !important;
+    color: white !important;
+    padding: 15px !important;
+    text-align: center !important;
+}
+
+h1 {
+    margin: 0 !important;
+}
+
+/* Buttons */
+button {
+    background-color: #0073e6 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 15px !important;
+    margin: 5px !important;
+    cursor: pointer !important;
+    border-radius: 5px !important;
+    transition: 0.3s !important;
+}
+
+button:hover {
+    background-color: #005bb5 !important;
+}
+
+/* Trash Can Icon */
+.trash-icon {
+    cursor: pointer !important;
+    color: red !important;
+    font-size: 16px !important;
+    margin-left: 10px !important;
+}
+
+/* Thread Styling */
+.thread-container {
+    background-color: white !important;
+    padding: 15px !important;
+    margin: 20px auto !important;
+    width: 90% !important;
+    max-width: 600px !important;
+    border-radius: 8px !important;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.thread-container input, 
+.thread-container textarea {
+    width: 100% !important;
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+}
+
+#threads {
+    width: 90% !important;
+    max-width: 800px !important;
+    margin: auto !important;
+}
+
+.thread {
+    background-color: white !important;
+    padding: 15px !important;
+    margin-bottom: 10px !important;
+    border-radius: 8px !important;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+}
+
+.thread img {
+    max-width: 200px !important;
+    display: block !important;
+    margin-top: 10px !important;
+}
+
+/* Comments and Replies */
+.comment, .reply {
+    background-color: #ffffff !important;
+    border-left: 2px solid #0073e6 !important;
+    padding: 10px !important;
+    margin-top: 10px !important;
+    border-radius: 5px !important;
+}
+
+.nested-reply {
+    margin-left: 20px !important;
+    border-left: 2px solid #0073e6 !important;
+    padding-left: 10px !important;
+}
+
+/* Menu & Navigation */
+nav {
+    background-color: #0073e6 !important;
+    padding: 10px !important;
+    text-align: center !important;
+}
+
+nav a {
+    color: white !important;
+    text-decoration: none !important;
+    padding: 10px 15px !important;
+    margin: 5px !important;
+    display: inline-block !important;
+    transition: 0.3s !important;
+}
+
+nav a:hover {
+    background-color: #005bb5 !important;
+    border-radius: 5px !important;
+}
+
+/* Back Button */
+.back-button {
+    display: block !important;
+    margin: 20px auto !important;
+    text-align: center !important;
+}

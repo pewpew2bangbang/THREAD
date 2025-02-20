@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> <link rel="shortcut icon" href="favicon.ico">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniForum</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .thread-container { margin-bottom: 20px; }
+        .comment, .reply { border-left: 2px solid #ccc; padding-left: 10px; margin-top: 10px; }
+        .nested-reply { margin-left: 20px; }
+        .trash-icon { cursor: pointer; color: red; }
+		
+		* {margin:0;padding:0;}
+	
+	.background-image {background-image: url('16.png');
+	background-size:cover;
+	background-repeat:no-repeat;
+	width:100%;
+	height: 100vh; z-index: -1; position: fixed;
+	}
+		
+		
+    </style>
+	
+	
+
+	
+</head>
+<body> <div class="background-image"></div>
+    <header>
+        <h1>Thread Page</h1>
+        <button onclick="logout()">Logout</button>
+    </header>
+
+    <!-- Create Thread -->
+    <div class="thread-container">
+        <input type="text" id="threadTitle" placeholder="Thread title">
+        <textarea id="threadContent" placeholder="Write something..."></textarea>
+        <input type="file" id="imageUpload">
+        <button onclick="postThread()">Post</button>
+    </div>
+
+    <div id="threads"></div>
+
+    <button onclick="history.back()">Back</button>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("username");
+            window.location.href = "login.html";
+        }
+
+        function postThread() {
+            let username = localStorage.getItem("username");
+            let title = document.getElementById("threadTitle").value;
+            let content = document.getElementById("threadContent").value;
+            let imageFile = document.getElementById("imageUpload").files[0];
+
+            if (!title || !content) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            let thread = {
+                id: Date.now(),
+                username,
+                title,
+                content,
+                image: imageFile ? URL.createObjectURL(imageFile) : null,
+                comments: []
+            };
+
+            let threads = JSON.parse(localStorage.getItem("threads")) || [];
+            threads.push(thread);
+            localStorage.setItem("threads", JSON.stringify(threads));
+
+            displayThreads();
+        }
+
+        function displayThreads() {
+            let threads = JSON.parse(localStorage.getItem("threads")) || [];
+            let threadContainer = document.getElementById("threads");
+            threadContainer.innerHTML = "";
+
+            threads.forEach(thread => {
+                let threadDiv = document.createElement("div");
+                threadDiv.classList.add("thread");
+                threadDiv.innerHTML = `
+                    <h3>${thread.title}</h3>
+                    <p>${thread.content}</p>
+                    <small>Posted by: ${thread.username}</small>
+                    ${thread.image ? `<img src="${thread.image}" style="max-width: 200px;">` : ""}
+                    <span class="trash-icon" onclick="deleteThread(${thread.id})">🗑️</span>
+                    <button onclick="toggleCommentBox(${thread.id})">Comment</button>
+                    <div id="comments-${thread.id}"></div>
+                    <div id="commentBox-${thread.id}" style="display:none;">
+                        <textarea id="commentInput-${thread.id}" placeholder="Write a comment..."></textarea>
+                        <button onclick="postComment(${thread.id})">Post Comment</button>
+                    </div>
+                    <hr>
+                `;
+                threadContainer.appendChild(threadDiv);
+                displayComments(thread.id, thread.comments);
+            });
+        }
+
+        function deleteThread(threadId) {
+            let threads = JSON.parse(localStorage.getItem("threads")) || [];
+            threads = threads.filter(thread => thread.id !== threadId);
+            localStorage.setItem("threads", JSON.stringify(threads));
+            displayThreads();
+        }
+
+        function toggleCommentBox(threadId) {
+            let commentBox = document.getElementById(`commentBox-${threadId}`);
+            commentBox.style.display = commentBox.style.display === "none" ? "block" : "none";
+        }
+
+        function postComment(threadId, parentId = null) {
+            let inputField = parentId ? document.getElementById(`replyInput-${parentId}`) : document.getElementById(`commentInput-${threadId}`);
+            let content = inputField.value.trim();
+            let username = localStorage.getItem("username");
+
+            if (!content) {
+                alert("Comment cannot be empty!");
+                return;
+            }
+
+            let comment = {
+                id: Date.now(),
+                username,
+                content,
+                replies: []
+            };
+
+            let threads = JSON.parse(localStorage.getItem("threads")) || [];
+            let thread = threads.find(t => t.id === threadId);
+
+            if (parentId) {
+                let parentComment = findComment(thread.comments, parentId);
+                if (parentComment) parentComment.replies.push(comment);
+            } else {
+                thread.comments.push(comment);
+            }
+
+            localStorage.setItem("threads", JSON.stringify(threads));
+            displayComments(threadId, thread.comments);
+            inputField.value = "";
+        }
+
+        function displayComments(threadId, comments, parentDiv = null, depth = 0) {
+            let commentSection = parentDiv || document.getElementById(`comments-${threadId}`);
+            commentSection.innerHTML = "";
+
+            comments.forEach(comment => {
+                let commentDiv = document.createElement("div");
+                commentDiv.classList.add("comment");
+                commentDiv.style.marginLeft = `${depth * 20}px`; // Thread line indicator
+
+                commentDiv.innerHTML = `
+                    <p><strong>${comment.username}</strong>: ${comment.content}</p>
+                    <button onclick="toggleReplyBox(${comment.id})">Reply</button>
+                    <div id="replyBox-${comment.id}" style="display:none;">
+                        <textarea id="replyInput-${comment.id}" placeholder="Write a reply..."></textarea>
+                        <button onclick="postComment(${threadId}, ${comment.id})">Reply</button>
+                    </div>
+                    <div id="replies-${comment.id}" class="nested-reply"></div>
+                `;
+
+                commentSection.appendChild(commentDiv);
+                if (comment.replies.length > 0) {
+                    displayComments(threadId, comment.replies, commentDiv.querySelector(`#replies-${comment.id}`), depth + 1);
+                }
+            });
+        }
+
+        function toggleReplyBox(commentId) {
+            let replyBox = document.getElementById(`replyBox-${commentId}`);
+            replyBox.style.display = replyBox.style.display === "none" ? "block" : "none";
+        }
+
+        function findComment(comments, commentId) {
+            for (let comment of comments) {
+                if (comment.id === commentId) return comment;
+                let found = findComment(comment.replies, commentId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        displayThreads();
+    </script>
+</body>
+</html>
